@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grid Display</title>
+    <style>
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(100, 20px);
+        gap: 2px;
+      }
+      .block {
+        width: 20px;
+        height: 20px;
+      }
+      .red {
+        background-color: red;
+      }
+      .blue {
+        background-color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="grid" class="grid"></div>
+    <script>
+      function make(n, m) {
+        var state = {};
+
+        for (var i = 0; i < n; i++) {
+          state[i] = {};
+          for (var j = 0; j < m; j++) {
+            state[i][j] = Math.round(Math.random());
+          }
+        }
+        return state;
+      }
+
+      function render(state) {
+        var gridHtml = "";
+        var n = Object.keys(state).length;
+        var m = Object.keys(state[0]).length;
+
+        for (var i = 0; i < n; i++) {
+          for (var j = 0; j < m; j++) {
+            var cellColorClass = state[i][j] ? "red" : "blue";
+            gridHtml += '<div class="block ' + cellColorClass + '"></div>';
+          }
+        }
+
+        var gridElement = document.getElementById("grid");
+        gridElement.innerHTML = gridHtml;
+      }
+
+      function evolve(state) {
+        var n = Object.keys(state).length;
+        var m = Object.keys(state[0]).length;
+
+        var newState = {};
+
+        for (var i = 0; i < n; i++) {
+          newState[i] = {};
+          for (var j = 0; j < m; j++) {
+            var neighbors = 0;
+
+            // Check each of the eight neighbors while handling boundary cases
+            for (var di = -1; di <= 1; di++) {
+              for (var dj = -1; dj <= 1; dj++) {
+                if (di === 0 && dj === 0) continue; // Skip the cell itself
+
+                var ni = i + di,
+                  nj = j + dj;
+                if (
+                  ni >= 0 &&
+                  ni < n &&
+                  nj >= 0 &&
+                  nj < m &&
+                  state[ni][nj] === 1
+                ) {
+                  neighbors++;
+                }
+              }
+            }
+
+            // Apply the evolution rule
+            if (neighbors < 4) {
+              newState[i][j] = 0;
+            } else if (neighbors == 4) newState[i][j] = state[i][j];
+            else newState[i][j] = 1;
+          }
+        }
+
+        return newState;
+      }
+
+      var state = make(100, 100); // Example: Create a 10x10 grid
+      setInterval(function () {
+        state = evolve(state);
+        render(state);
+      }, 10);
+    </script>
+  </body>
+</html>
